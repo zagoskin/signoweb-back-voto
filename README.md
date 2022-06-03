@@ -25,3 +25,7 @@ e
 `http://localhost:PORT/api/opcao`
 
 Os métodos estão definidos nos arquivos dentro da pasta de rotas em `PASTAROOT/src/routes`
+
+## MySQL
+
+A base de dados foi feita usando MySQL. Informações sobre dados de conexão de banco de dados podem ser encontradas na pasta `PASTAROOT/src/config/db.config.js` 
