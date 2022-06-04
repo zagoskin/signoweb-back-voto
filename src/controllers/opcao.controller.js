@@ -1,5 +1,6 @@
 // const enqueteService = require('../services/enquete.service');
 const db = require('../models/index');
+const Enquete = db.enquete;
 const Opcao = db.opcao;
 const Op = db.Sequelize.Op;
 
@@ -151,25 +152,46 @@ exports.updateMany = (req, res) => {
 exports.delete = (req, res) => {
   const id = req.params.id;
 
-  Opcao.destroy({
-    where: { opcaoId: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Opcao was deleted successfully!"
+  Opcao.findByPk(id)
+  .then(opcao => {
+    Enquete.findOne({ where: { enqueteId: opcao.enqueteId }, include: { model: Opcao, as: 'opcoes'}})
+      .then(enquete => {
+        if (enquete !== null){
+          if (enquete.opcoes.length <= 3){
+            res.send({
+              message: `Cannot delete Opcao because Enquete with id: ${enquete.enqueteId} has only ${enquete.opcoes.length} opcoes`
+            });
+          } else {
+            Opcao.destroy({
+              where: { opcaoId: id }
+            })
+            .then(num => {
+              if (num == 1) {
+                res.send({
+                  message: "Opcao was deleted successfully!"
+                });
+              } else {
+                res.send({
+                  message: `Cannot delete Opcao with id=${id}. Maybe Opcao was not found!`
+                });
+              }
+            })
+            .catch(err => {
+              res.status(500).send({
+                message: `Could not delete Opcao with id=${id}`
+              });
+            });
+          }
+        }
+      })
+      .catch(error => {
+        res.status(500).send({
+          message: `Error finding Enquete with id: ${opcao.enqueteId}, to check for number of opcoes. ${error.message}`
         });
-      } else {
-        res.send({
-          message: `Cannot delete Opcao with id=${id}. Maybe Opcao was not found!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: `Could not delete Opcao with id=${id}`
       });
-    });
+  })
+
+  
 };
 
 //delete all opcoes
