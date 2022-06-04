@@ -14,3 +14,4 @@ dist-ssr
 coverage
 *.local
 
+src/config/
